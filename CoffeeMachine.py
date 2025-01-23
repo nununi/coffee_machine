@@ -1,97 +1,97 @@
-     class CoffeeMachine:
-         def __init__(self, config_file='config.txt'):
-             self.water = 0
-             self.coffee_beans = 0
-             self.milk = 0
-             self.load_config(config_file)
+  import time
 
-         def load_config(self, config_file):
-             try:
-                 with open(config_file, 'r') as file:
-                     for line in file:
-                         key, value = line.strip().split('=')
-                         if key == 'water':
-                             self.water = int(value)
-                         elif key == 'coffee_beans':
-                             self.coffee_beans = int(value)
-                         elif key == 'milk':
-                             self.milk = int(value)
-             except FileNotFoundError:
-                 print(f"Файл {config_file} не найден. Используются значения по умолчанию.")
-             except Exception as e:
-                 print(f"Ошибка при загрузке конфигурации: {e}")
+# Функции для работы с файлами
+def read_level_from_file(filename):
+    try:
+        with open(filename, 'r') as file:
+            level = int(file.read().strip())
+            return level
+    except (FileNotFoundError, ValueError):
+        print(f"Ошибка при чтении {filename}. Возвращается значение по умолчанию 0.")
+        return 0
 
-         def make_coffee(self, water_needed, coffee_needed, milk_needed):
-             if self.water < water_needed:
-                 print("Недостаточно воды!")
-                 return False
-             if self.coffee_beans < coffee_needed:
-                 print("Недостаточно кофе!")
-                 return False
-             if self.milk < milk_needed:
-                 print("Недостаточно молока!")
-                 return False
+def write_level_to_file(filename, level):
+    with open(filename, 'w') as file:
+        file.write(str(level))
 
-             self.water -= water_needed
-             self.coffee_beans -= coffee_needed
-             self.milk -= milk_needed
-             print("Кофе готов!")
-             return True
+def check_water_level():
+    return read_level_from_file('water_level.txt')
 
-         def refill(self, water, coffee, milk):
-             self.water += water
-             self.coffee_beans += coffee
-             self.milk += milk
-             print("Заправка завершена!")
+def check_coffee_beans_level():
+    return read_level_from_file('coffee_level.txt')
 
-         def status(self):
-             print(f"Текущие запасы:")
-             print(f"Вода: {self.water} мл")
-             print(f"Кофейные зерна: {self.coffee_beans} г")
-             print(f"Молоко: {self.milk} мл")
+def check_temperature():
+    return read_level_from_file('temperature.txt')
 
-     class ControlMode:
-         def __init__(self, machine):
-             self.machine = machine
+def check_sugar_level():
+    return read_level_from_file('sugar_level.txt')
 
-         def run(self):
-             while True:
-                 print("\nВыберите действие:")
-                 print("1. Сделать кофе")
-                 print("2. Заправить кофемашину")
-                 print("3. Проверить запасы")
-                 print("4. Выход")
+def brew_coffee():
+    water_level = check_water_level()
+    coffee_level = check_coffee_beans_level()
+    temperature = check_temperature()
+    sugar_level = check_sugar_level()
 
-                 choice = input("Введите номер действия: ")
+    if water_level < 200:
+        print("Недостаточно воды для приготовления кофе.")
+        return
+    
+    if coffee_level < 10:
+        print("Недостаточно кофе для приготовления.")
+        return
 
-                 if choice == '1':
-                     water_needed = int(input("Введите количество воды (мл): "))
-                     coffee_needed = int(input("Введите количество кофе (г): "))
-                     milk_needed = int(input("Введите количество молока (мл): "))
-                     self.machine.make_coffee(water_needed, coffee_needed, milk_needed)
+    if temperature < 90:
+        print("Температура воды недостаточна для приготовления кофе.")
+        return
 
-                 elif choice == '2':
-                     water = int(input("Введите количество воды для заправки (мл): "))
-                     coffee = int(input("Введите количество кофе для заправки (г): "))
-                     milk = int(input("Введите количество молока для заправки (мл): "))
-                     self.machine.refill(water, coffee, milk)
-                 elif choice == '3':
-                     self.machine.status()
+    print("Приготовление кофе...")
+    
+    # Нагрев воды (симуляция)
+    print("Нагрев воды до 90°C...")
+    time.sleep(5)  # Имитация времени нагрева
+    
+    # Симуляция процесса приготовления
+    print("Процесс приготовления...")
+    time.sleep(5)  # Имитация времени приготовления
+    
+    # Обновление уровней
+    new_water_level = water_level - 200
+    new_coffee_level = coffee_level - 10
+    
+    # Добавление сахара в кофе
+    if sugar_level > 0:
+        print(f"Добавление {sugar_level} граммов сахара в кофе.")
+    
+    write_level_to_file('water_level.txt', new_water_level)
+    write_level_to_file('coffee_level.txt', new_coffee_level)
+    
+    print("Кофе успешно приготовлено!")
 
-                 elif choice == '4':
-                     print("Выход из режима управления.")
-                     break
+def set_temperature():
+    new_temperature = int(input("Введите новую температуру (°C): "))
+    write_level_to_file('temperature.txt', new_temperature)
+    print(f"Температура установлена на {new_temperature}°C.")
 
-                 else:
-                     print("Неверный выбор. Пожалуйста, попробуйте снова.")
+def set_sugar_level():
+    new_sugar_level = int(input("Введите уровень сахара (граммы): "))
+    write_level_to_file('sugar_level.txt', new_sugar_level)
+    print(f"Уровень сахара установлен на {new_sugar_level} граммов.")
 
-     def main():
-         machine = CoffeeMachine()
-         control_mode = ControlMode(machine)
-         control_mode.run()
+def main():
+    while True:
+        command = input("Введите 'brew' для приготовления кофе, 'set_temp' для установки температуры, 'set_sugar' для установки сахара или 'exit' для выхода: ").strip().lower()
+        if command == 'brew':
+            brew_coffee()
+        elif command == 'set_temp':
+            set_temperature()
+        elif command == 'set_sugar':
+            set_sugar_level()
+elif command == 'exit':
+            break
+        else:
+            print("Неверная команда. Пожалуйста, введите 'brew', 'set_temp', 'set_sugar' или 'exit'.")
 
-     if __name__ == "__main__":
-         main()
-     
+if __name__ == "__main__":
+    main()
 
 
